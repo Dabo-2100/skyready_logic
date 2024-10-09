@@ -46,6 +46,7 @@ $statements = array_merge($statements, [
         package_id          INT NOT NULL,
         FOREIGN KEY (package_id) REFERENCES work_packages(package_id),
         task_name           VARCHAR(255) NOT NULL,
+        task_weight         VARCHAR(255) NULL,
         task_order          INT(20),
         task_duration       FLOAT(20),
         specialty_id        INT NULL, 

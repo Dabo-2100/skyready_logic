@@ -29,6 +29,7 @@ $statements = array_merge($statements, [
         status_id                       INT DEFAULT 1,
         FOREIGN KEY (status_id) REFERENCES project_status(status_id),
         project_duration                FLOAT(20) NULL,
+        active_hours                    FLOAT(20) NULL,
         project_progress                FLOAT(20) DEFAULT 0,
         aircraft_id                     INT,
         FOREIGN KEY (aircraft_id) REFERENCES app_aircraft(aircraft_id),
