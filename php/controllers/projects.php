@@ -9,6 +9,7 @@ $endpoints += [
     '/api/project/\d+/workpackages/\d+/tasks'           => 'project_tasks',
     '/api/project/workpackages/filter/\d+'              => 'project_wps_filter',
     '/api/project/\d+/workpackages/filter/\d+/tasks'    => 'project_tasks_filter',
+    '/api/project/\d+/workpackages/\d+/remove'          => 'project_remove_workpackage',
 ];
 
 function projects_index()
@@ -320,6 +321,74 @@ function project_tasks_filter($id)
             }
             $response['err'] = false;
             $response['msg'] = 'WorkPackages Are Ready To View';
+            $response['data'] = $final;
+        } else {
+            $response['msg'] = 'Project id is wrong !';
+        }
+        echo json_encode($response, true);
+    } else {
+        echo 'Method Not Allowed';
+    }
+}
+
+
+function project_remove_workpackage($id)
+{
+    global $method, $response, $POST_data, $pdo;
+    $project_id = explode("/workpackages", (explode("/api/project/", $id[0])[1]))[0];
+    $package_id = explode("/remove", (explode("workpackages/", $id[0])[1]))[0];
+    if ($method === "POST") {
+        $operator_info = checkAuth();
+        $project_info = getRows("app_projects", "project_id=" . htmlspecialchars($project_id));
+        if (isset($project_info[0])) {
+            $sql = "
+            START TRANSACTION;
+
+            -- Delete child comments first
+            DELETE tc_child
+            FROM task_comments tc_child
+            JOIN project_tasks pt ON tc_child.log_id = pt.log_id
+            JOIN work_package_tasks wpt ON pt.task_id = wpt.task_id
+            WHERE wpt.package_id = {$package_id} AND tc_child.parent_id IS NOT NULL;
+
+            -- Delete parent comments (those without a parent_id)
+            DELETE tc_parent
+            FROM task_comments tc_parent
+            JOIN project_tasks pt ON tc_parent.log_id = pt.log_id
+            JOIN work_package_tasks wpt ON pt.task_id = wpt.task_id
+            WHERE wpt.package_id = {$package_id} AND tc_parent.parent_id IS NULL;
+
+            DELETE pt
+            FROM project_tasks pt
+            JOIN work_package_tasks wpt ON pt.task_id = wpt.task_id
+            WHERE wpt.package_id = {$package_id} AND pt.project_id ={$project_id};
+
+            DELETE wpt
+            FROM work_package_progress_tracker wpt
+            WHERE wpt.work_packages_log_id = (SELECT log_id FROM project_work_packages 
+            WHERE work_package_id = {$package_id} AND project_id = {$project_id});
+            
+            
+            DELETE wpst
+            FROM work_package_status_tracker wpst
+            WHERE wpst.work_package_log_id = (SELECT log_id FROM project_work_packages 
+            WHERE work_package_id = {$package_id} AND project_id = {$project_id});
+
+            DELETE pwp
+            FROM project_work_packages pwp
+            WHERE pwp.work_package_id = {$package_id} AND pwp.project_id ={$project_id};
+
+            UPDATE app_projects 
+            SET project_progress = get_project_progress({$project_id});
+
+            COMMIT;
+
+            ";
+            $statement = $pdo->prepare($sql);
+            $statement->execute();
+            $final = [];
+            $response['err'] = false;
+            $response['msg'] = 'Work Package Deleted Successflly';
             $response['data'] = $final;
         } else {
             $response['msg'] = 'Project id is wrong !';
