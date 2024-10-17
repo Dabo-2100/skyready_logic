@@ -64,17 +64,50 @@ function workpackge_tasks_store()
 
 function workpackge_tasks_delete()
 {
-    global $method, $POST_data, $response;
+    global $method, $POST_data, $pdo, $response;
     if ($method === "POST") {
         $operator_info = checkAuth();
-        if ($operator_info['is_super'] == 1) {
-            $status_id = htmlspecialchars($POST_data["status_id"]);
-            $status_id = delete_data("aircraft_status", "status_id = $status_id");
-            if (is_null($status_id) == false) {
-                $response['err'] = false;
-                $response['msg'] = "Status Deleted Successfully";
-                $response['data'] = getRows("aircraft_status", "is_active = 1");
+        if ($operator_info) {
+            $task_id = $POST_data['task_id'];
+            $package_id = getOneField("work_package_tasks", "package_id", "task_id = {$task_id}");
+            $affected_projects = getRows("project_tasks", "task_id = {$task_id}");
+            $affected_wps = array_map(function ($project) {
+                global $POST_data;
+                $package_id = getOneField("work_package_tasks", "package_id", "task_id = {$POST_data['task_id']}");
+                $project_id = $project['project_id'];
+                return getOneField("project_work_packages", "log_id", "work_package_id = {$package_id} AND project_id ={$project_id}");
+            }, $affected_projects);
+            $sql = "
+                START TRANSACTION;
+                    DELETE FROM task_comments WHERE log_id IN (SELECT log_id FROM `project_tasks` WHERE task_id = {$task_id});
+                    DELETE FROM tasks_x_zones WHERE task_id = {$task_id};
+                    DELETE FROM tasks_x_tags WHERE task_id = {$task_id};
+                    DELETE FROM project_tasks WHERE task_id = {$task_id};
+                    DELETE FROM work_package_tasks WHERE task_id = {$task_id};
+                COMMIT;
+            ";
+            $statement = $pdo->prepare($sql);
+            $statement->execute();
+
+            foreach ($affected_wps as $index => $wp_id) {
+                $sql = "UPDATE project_work_packages 
+                SET work_package_progress = get_wp_progress($wp_id) 
+                WHERE log_id = {$wp_id}";
+                $statement = $pdo->prepare($sql);
+                $statement->execute();
             }
+
+            foreach ($affected_projects as $index => $project) {
+                $project_id = $project['project_id'];
+                $sql = "UPDATE app_projects 
+                SET project_progress = get_project_progress($project_id) 
+                WHERE project_id = {$project_id}";
+                $statement = $pdo->prepare($sql);
+                $statement->execute();
+            }
+
+            $response['err'] = false;
+            $response['msg'] = "Task Deleted Successfully";
             echo json_encode($response, true);
         } else {
             echo "Error : 401 | No Authority";
