@@ -12,8 +12,8 @@ require 'vendor/autoload.php';
 require './database/db_creator.php';
 // Use JWT Token & mailer
 require "./functions/sql_functions.php";
-require './functions/token_functions.php';
 require './functions/helper_functions.php';
+require './functions/token_functions.php';
 
 // Use Server Method
 $method = $_SERVER['REQUEST_METHOD'];

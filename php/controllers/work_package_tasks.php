@@ -79,7 +79,8 @@ function workpackge_tasks_delete()
             }, $affected_projects);
             $sql = "
                 START TRANSACTION;
-                    DELETE FROM task_comments WHERE log_id IN (SELECT log_id FROM `project_tasks` WHERE task_id = {$task_id});
+                    DELETE FROM task_comments WHERE log_id IN (SELECT log_id FROM `project_tasks` WHERE task_id = {$task_id}) AND parent_id IS NOT NULL;
+                    DELETE FROM task_comments WHERE log_id IN (SELECT log_id FROM `project_tasks` WHERE task_id = {$task_id}) AND parent_id IS NULL;
                     DELETE FROM tasks_x_zones WHERE task_id = {$task_id};
                     DELETE FROM tasks_x_tags WHERE task_id = {$task_id};
                     DELETE FROM project_tasks WHERE task_id = {$task_id};

@@ -35,6 +35,30 @@ function sendMail($sendTo, $subject, $msg)
     }
 }
 
+function getUserIP()
+{
+    // If you trust the proxy, check these headers
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        // Multiple IP addresses may be comma-separated, so take the first one
+        $ip_array = explode(',', $ip);
+        $ip = trim($ip_array[0]);
+    } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } else {
+        // Default to REMOTE_ADDR
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+
+    // Validate the IP address
+    if (filter_var($ip, FILTER_VALIDATE_IP)) {
+        return $ip;
+    } else {
+        return 'Invalid IP';
+    }
+}
+
+
 // function upload_items()
 // {
 //     global $method;

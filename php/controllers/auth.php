@@ -1,11 +1,12 @@
 <?php
 // Routes
 $endpoints += [
-    '/api/auth/login'       => 'auth_login',
-    '/api/auth/reset'       => 'auth_rest_password',
-    '/api/auth/check'       => 'auth_check_token',
-    '/api/auth/activate'    => 'auth_active_user',
-    // '/api/auth/resendcode'  => 'resend_code',
+    '/api/auth/login'           => 'auth_login',
+    '/api/auth/reset'           => 'auth_rest_password',
+    '/api/auth/check'           => 'auth_check_token',
+    '/api/auth/activate'        => 'auth_active_user',
+    '/api/auth/token/update'    => 'udate_token',
+    '/api/auth/ip'              => 'test_function',
 ];
 
 function auth_login()
@@ -134,4 +135,9 @@ function auth_active_user()
     } else {
         echo 'Method Not Allowed';
     }
+}
+
+function test_function()
+{
+    echo "i'm Ready For Testing IP is : " . getUserIP();
 }

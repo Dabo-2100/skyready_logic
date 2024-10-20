@@ -26,6 +26,13 @@ $statements = array_merge($statements, [
         (2,"In Progress"),
         (3,"On Hold"),
         (4,"Completed"),
-        (5,"N/A")
+        (5,"N/A"),
+        (6,"Waiting For Spare parts"),
+        (7,"Waiting For Installation"),
+        (8,"Waiting For Manpower"),
+        (9,"Waiting For Findings"),
+        (10,"Mixed Task"),
+        (11,"Waiting For Tools"),
+        (12,"Waiting For Mail")
     ',
 ]);

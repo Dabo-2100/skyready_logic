@@ -100,12 +100,6 @@ function users_store()
             $response['msg'] = $err;
         }
         echo json_encode($response, true);
-        // } 
-        // else {
-        //     echo "Error : 401 | No Authority";
-        //     http_response_code(401);
-        //     exit();
-        // }
     } else {
         echo 'Method Not Allowed';
     }
