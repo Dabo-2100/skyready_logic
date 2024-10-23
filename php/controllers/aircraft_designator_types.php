@@ -13,7 +13,7 @@ function designatorTypes_index()
         $operator_info = checkAuth();
         $response['err'] = false;
         $response['msg'] = 'All Types Are Ready To View';
-        $response['data'] =  getRows("designator_types", "is_active = 1 ORDER BY designator_name");
+        $response['data'] =  getRows("designator_types", "is_active = 1 ORDER BY type_name");
         echo json_encode($response, true);
     } else {
         echo 'Method Not Allowed';

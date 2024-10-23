@@ -36,7 +36,7 @@ function designators_show($id)
         $operator_info = checkAuth();
         $designtros = getRows("aircraft_designators", "is_active = 1 AND model_id = {$model_id}");
         $response['err'] = false;
-        $response['msg'] = "New Designator Added Successfully";
+        $response['msg'] = "Show All Designators Successfully";
         $response['data'] = array_map(function ($el) {
             $el['model_name'] = getOneField("aircraft_models", "model_name", "model_id = {$el['model_id']}");
             $el['type_name'] = getOneField("designator_types", "type_name", "type_id = {$el['type_id']}");

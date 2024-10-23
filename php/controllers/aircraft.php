@@ -20,7 +20,7 @@ function aircraft_index()
             $el['manufacturer_name'] = getOneField("aircraft_manufacturers", "manufacturer_name", "manufacturer_id = " . $el['manufacturer_id']);
             $el['model_name'] = getOneField("aircraft_models", "model_name", "model_id = " . $el['model_id']);
             return $el;
-        }, getRows("app_aircraft", "is_active = 1"));
+        }, getRows("app_aircraft", "is_active = 1 ORDER BY model_id,aircraft_serial_no"));
         echo json_encode($response, true);
     } else {
         echo 'Method Not Allowed';

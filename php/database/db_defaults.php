@@ -12,6 +12,24 @@ $statements = array_merge($statements, [
         (6,"Users Manager","fa-users",6)
     ',
 
+    'INSERT IGNORE INTO designator_types 
+        (type_id,type_name) VALUES 
+        (1,"Cable Assembly"),
+        (2,"GROUND STUD"),
+        (3,"TERMINAL BOARD"),
+        (4,"Plugin"),
+        (5,"Junction"),
+        (6,"SWITCH"),
+        (7,"SPLICE"),
+        (8,"CB"),
+        (9,"RELAY SOCKET"),
+        (10,"DIODE"),
+        (11,"WIRE"),
+        (12,"CONNECTOR"),
+        (13,"DATA BUS"),
+        (14,"BUS TERMINATOR")
+    ',
+
     'INSERT IGNORE INTO app_specialties 
         (specialty_id,specialty_name) VALUES 
         (1,"Planning"),

@@ -379,7 +379,8 @@ function project_remove_workpackage($id)
             WHERE pwp.work_package_id = {$package_id} AND pwp.project_id ={$project_id};
 
             UPDATE app_projects 
-            SET project_progress = get_project_progress({$project_id});
+            SET project_progress = get_project_progress({$project_id})
+            WHERE project_id = {$project_id};
 
             COMMIT;
 
