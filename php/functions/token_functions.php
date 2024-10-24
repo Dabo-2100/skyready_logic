@@ -5,9 +5,17 @@ require_once './vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function createToken($payload)
+function createToken($user_id, $is_super)
 {
     $key = 'Dabo2100@IPACO';
+    $payload = [
+        "iss" => gethostbyaddr($_SERVER['REMOTE_ADDR']),
+        "iss_ip" => $_SERVER['REMOTE_ADDR'],
+        "iat" => time(), // issued at time
+        "exp" => time() + (7 * 60 * 60), // expiration time after one week
+        "user_id" => $user_id,
+        "is_super" => $is_super
+    ];
     $token = JWT::encode($payload, $key, 'HS256');
     return $token;
 }
@@ -17,7 +25,7 @@ function checkToken($token)
     $key = 'Dabo2100@IPACO';
     try {
         $decoded = JWT::decode($token, new Key($key, 'HS256'));
-        return json_encode((array) $decoded);
+        return json_encode($decoded);
     } catch (Exception $e) {
         return false;
     }

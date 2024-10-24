@@ -5,8 +5,6 @@ $endpoints += [
     '/api/auth/reset'           => 'auth_rest_password',
     '/api/auth/check'           => 'auth_check_token',
     '/api/auth/activate'        => 'auth_active_user',
-    '/api/auth/token/update'    => 'udate_token',
-    '/api/auth/ip'              => 'test_function',
 ];
 
 function auth_login()
@@ -19,9 +17,11 @@ function auth_login()
         if (isset($user_hashed_password)) {
             if (password_verify($user_password, $user_hashed_password)) {
                 $is_active = getOneField("app_users", "is_active", "user_email = '$user_email'");
+                $user_token = getOneField("app_users", "user_token", "user_email = '$user_email'");
                 if ($is_active == 1) {
                     $user_info = getRows("app_users", "user_email= '$user_email'");
                     $response['err']  = false;
+                    $response['isActive']  = true;
                     $response['msg']  = "User Login Successfully!";
                     $response['data'] = $response['data'] =  array_map(function ($user) {
                         return [
@@ -34,9 +34,11 @@ function auth_login()
                         ];
                     }, $user_info);
                 } else {
-                    $response['err']  = false;
+                    $response['data'] = [
+                        'user_token' => $user_token,
+                    ];
                     $response['msg']  = "User is not active";
-                    $response['data'] = ['is_active' => 0];
+                    $response['isActive']  = false;
                 }
             } else {
                 $response['msg'] = "Wrong Email or Password";
@@ -56,14 +58,10 @@ function auth_rest_password()
     if ($method === "POST") {
         $operator_info = checkAuth();
         $user_email = htmlspecialchars(strtolower(@$POST_data["user_email"]));
-        $default = password_hash('user1234', PASSWORD_DEFAULT);
+        $default_hash = password_hash($_ENV['DEFAULT_PASSWORD'], PASSWORD_DEFAULT);
         if ($operator_info['is_super'] == 1) {
-            update_data(
-                "app_users",
-                "user_email = '$user_email'",
-                ['user_password' => $default]
-            );
-            sendMail("a_fattah_m@icloud.com", "Password Reset", "Your password have been reset Your Default Password is : user1234");
+            update_data("app_users", "user_email = '$user_email'", ['user_password' => $default_hash]);
+            sendMail("{$user_email}", "Password Reset", "Your password have been reset Your Default Password is : <b>{$_ENV['DEFAULT_PASSWORD']}</b>");
         } else {
             $response['msg'] = 'User have no authority';
             echo json_encode($response, true);
@@ -78,8 +76,8 @@ function auth_check_token()
     global $method, $response;
     if ($method === "POST") {
         $operator_info = checkAuth();
-        $user_email = $operator_info['user_email'];
-        $user_info = getRows("app_users", "user_email = '$user_email'");
+        $user_id = $operator_info['user_id'];
+        $user_info = getRows("app_users", "user_id = {$user_id}");
         if (isset($user_info[0])) {
             $response['err'] = false;
             $response['msg'] = 'User Data is Ready To View';
@@ -118,26 +116,21 @@ function auth_active_user()
 {
     global $method, $response, $POST_data;
     if ($method === "POST") {
-        $operator_info = checkAuth();
-        $user_email = $operator_info['user_email'];
+        $user_email = $POST_data['user_email'];
         $user_vcode = $POST_data['user_vcode'];
-        $user_actual_vcode = getOneField("app_users", "user_vcode", "user_email ='$user_email'");
-        if ($user_vcode == $user_actual_vcode) {
-            update_data(
-                "app_users",
-                "user_email = '$user_email'",
-                ['is_active' => 1]
-            );
+        $operator_info = checkAuth();
+        $user_id = $operator_info['user_id'];
+        $db_user_email = getOneField("app_users", "user_email", "user_id = {$user_id}");
+        $db_user_vcode = getOneField("app_users", "user_vcode", "user_id = {$user_id}");
+        if ($user_vcode == $db_user_vcode &&  $user_email == $db_user_email) {
+            update_data("app_users", "user_email = '$user_email'", ['is_active' => 1]);
+            $response['err'] = false;
+            $response['msg'] = 'User Activated Successfuly !';
         } else {
             $response['msg'] = 'The Verification code is invalid';
-            echo json_encode($response, true);
         }
+        echo json_encode($response, true);
     } else {
         echo 'Method Not Allowed';
     }
-}
-
-function test_function()
-{
-    echo "i'm Ready For Testing IP is : " . getUserIP();
 }

@@ -8,6 +8,9 @@ header("Access-Control-Allow-Credentials: true");
 
 // Include Composer autoloader
 require 'vendor/autoload.php';
+// make .env File Load
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 // Create Database Connection
 require './database/db_creator.php';
 // Use JWT Token & mailer

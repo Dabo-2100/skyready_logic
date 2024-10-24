@@ -6,22 +6,22 @@ function checkAuth()
         $headerParts = explode(' ', $_SERVER['HTTP_AUTHORIZATION']);
         if (count($headerParts) == 2 && $headerParts[0] == 'Bearer') {
             $accessToken = $headerParts[1];
-            $user_info = json_decode(checkToken($accessToken), true);
-            if (isset($user_info)) {
-                return $user_info;
+            $token_data = json_decode(checkToken($accessToken), true);
+            if (isset($token_data)) {
+                return $token_data;
             } else {
-                echo "Error : 401 | False Token";
+                echo "Error : 401 | Unauthorized False Token";
                 http_response_code(401);
                 exit();
             }
         } else {
-            echo "Error : 400 | Bad Request";
+            echo "Error : 400 | Bad Request No Token";
             http_response_code(400);
             exit();
         }
     } else {
-        echo "Error : 401 | Unauthorized";
-        http_response_code(401);
+        echo "Error : 400 | Bad Request No Token";
+        http_response_code(400);
         exit();
     }
 }
@@ -124,7 +124,7 @@ function insert_data($table_name = false, $Fields = false, $Values = false)
             }
         }
 
-        $sql = "INSERT  INTO $table_name ($FieldsStr) VALUES ($ValuesStr)";
+        $sql = "INSERT INTO $table_name ($FieldsStr) VALUES ($ValuesStr)";
         try {
             $statement = $pdo->prepare($sql);
             $statement->execute();
@@ -209,6 +209,3 @@ function delete_data($table_name = false, $condition = false)
     }
     return $res;
 }
-
-
-

@@ -6,6 +6,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 require './vendor/phpmailer/phpmailer/src/Exception.php';
 require './vendor/phpmailer/phpmailer/src/PHPMailer.php';
 require './vendor/phpmailer/phpmailer/src/SMTP.php';
+
 // // Use PhpSpreadsheet classes
 // use PhpOffice\PhpSpreadsheet\IOFactory;
 // use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Date;
@@ -15,14 +16,14 @@ function sendMail($sendTo, $subject, $msg)
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();                                            //Send using SMTP
-        $mail->Host       = 'smtp.hostinger.com';                     //Set the SMTP server to send through
+        $mail->Host       = 'smtp.hostinger.com';                   //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'verify@easetasks.com';                     //SMTP username
-        $mail->Password   = '$c0ET]1BaEfg';                               //SMTP password
+        $mail->Username   = 'info@skyready.online';                 //SMTP username
+        $mail->Password   = '^UtILh!v9';                         //SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
         //Recipients
-        $mail->setFrom('verify@easetasks.com', 'IPACO SkyReady');
+        $mail->setFrom('info@skyready.online', 'SkyReady');
         $mail->addAddress($sendTo);     //Add a recipient
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML

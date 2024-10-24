@@ -1,6 +1,5 @@
 <?php
-// $host     = 'srv964.hstgr.io';
-$host     = 'localhost';
-$db       = 'u633829885_skyready';
-$user     = 'u633829885_skyready_root';
-$password = '@Soo2taw2eet';
+$host     = $_ENV['DB_HOST'];
+$db       = $_ENV['DB_DATABASE'];
+$user     = $_ENV['DB_USERNAME'];
+$password = $_ENV['DB_PASSWORD'];

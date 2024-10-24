@@ -1,9 +1,11 @@
 <?php
 // Controller Routes
 $endpoints += [
-    '/api/users'        => 'users_index',
-    '/api/users/\d+'    => 'users_show',
-    '/api/users/store'  => 'users_store',
+    '/api/users'                => 'users_index',
+    '/api/users/\d+'            => 'users_show',
+    '/api/users/store'          => 'users_store',
+    '/api/users/test'           => 'token_test',
+    '/api/users/token/update'   => 'token_update',
 ];
 
 function users_index()
@@ -71,26 +73,25 @@ function users_show($id)
 
 function users_store()
 {
-    // Who can use this function 
-    // Super_User , Specialty Admin
     global $method, $POST_data, $response;
     if ($method === "POST") {
+        $default_password = $_ENV['DEFAULT_PASSWORD'];
         // $operator_info = checkAuth();
         // if ($operator_info['is_super'] == 1) {
-        $user_name = htmlspecialchars(@$POST_data["user_name"]);
         $user_email = htmlspecialchars(strtolower(@$POST_data["user_email"]));
+        $user_name = htmlspecialchars(@$POST_data["user_name"]);
         $specialty_id = htmlspecialchars(@$POST_data["specialty_id"]);
         $is_super = htmlspecialchars(@$POST_data["is_super"]);
-        $user_password = password_hash('user', PASSWORD_DEFAULT);
+        $hashed_password = password_hash($default_password, PASSWORD_DEFAULT);
         $user_vcode = rand(1000, 9999);
         try {
-            $user_id = insert_data("app_users", ["user_name", "user_email", "user_password", "user_vcode", "specialty_id", "is_super"], [$user_name, $user_email, $user_password, $user_vcode, $specialty_id, $is_super]);
-            $user_token = createToken(['user_id' => $user_id, 'user_email' => $user_email, 'is_super' => $is_super]);
+            $user_id = insert_data("app_users", ["user_name", "user_email", "user_password", "user_vcode", "specialty_id", "is_super"], [$user_name, $user_email, $hashed_password, $user_vcode, $specialty_id, $is_super]);
+            $user_token = createToken($user_id, $is_super);
             try {
                 $update_token = update_data("app_users", "user_id = $user_id", ['user_token' => $user_token]);
                 if ($update_token == 1) {
                     $response['err'] = false;
-                    $response['msg'] = "User added Successfuly Defalut password is : 'user' !";
+                    $response['msg'] = "User added Successfuly Defalut password is : '{$default_password}' !";
                     $response['data'] = ['user_id' => $user_id, 'user_token' => $user_token];
                 }
             } catch (\Throwable $err) {
@@ -99,6 +100,9 @@ function users_store()
         } catch (\Throwable $err) {
             $response['msg'] = $err;
         }
+        // } else {
+        //     $response['msg'] = "Only Super Users can register new users";
+        // }
         echo json_encode($response, true);
     } else {
         echo 'Method Not Allowed';
