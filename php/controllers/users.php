@@ -1,5 +1,8 @@
 <?php
 // Controller Routes
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 $endpoints += [
     '/api/users'                => 'users_index',
     '/api/users/\d+'            => 'users_show',
@@ -63,7 +66,7 @@ function users_show($id)
                 ];
             }, $user_info);
         } else {
-            $response['msg'] = 'User id is wrong !';
+            // $response['msg'] = 'User id is wrong !';
         }
         echo json_encode($response, true);
     } else {
@@ -106,5 +109,14 @@ function users_store()
         echo json_encode($response, true);
     } else {
         echo 'Method Not Allowed';
+    }
+}
+
+function token_test()
+{
+    $operator_info = checkAuth();
+    print_r($operator_info);
+    if ($operator_info['user_id']) {
+        echo "Tamam";
     }
 }

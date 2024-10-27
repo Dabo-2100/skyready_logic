@@ -77,8 +77,8 @@ function auth_check_token()
     if ($method === "POST") {
         $operator_info = checkAuth();
         $user_id = $operator_info['user_id'];
-        $user_info = getRows("app_users", "user_id = {$user_id}");
-        if (isset($user_info[0])) {
+        if (isset($user_id)) {
+            $user_info = getRows("app_users", "user_id = {$user_id}");
             $response['err'] = false;
             $response['msg'] = 'User Data is Ready To View';
             $response['data'] =  array_map(function ($user) {
@@ -103,8 +103,8 @@ function auth_check_token()
                     }, $user_roles),
                 ];
             }, $user_info);
-        } else {
-            $response['msg'] = 'User id is wrong !';
+        } {
+            // $response['msg'] = 'User id is wrong !';
         }
         echo json_encode($response, true);
     } else {
