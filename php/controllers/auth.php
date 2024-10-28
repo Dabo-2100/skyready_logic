@@ -81,7 +81,7 @@ function auth_check_token()
             $user_info = getRows("app_users", "user_id = {$user_id}");
             $response['err'] = false;
             $response['msg'] = 'User Data is Ready To View';
-            $response['data'] =  array_map(function ($user) {
+            $response['data'] = array_map(function ($user) {
                 $user_roles = getRows("app_user_authority", "user_id=" . $user['user_id']);
                 return [
                     'user_id'    => $user['user_id'],

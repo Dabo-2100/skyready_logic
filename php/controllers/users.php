@@ -114,9 +114,5 @@ function users_store()
 
 function token_test()
 {
-    $operator_info = checkAuth();
-    print_r($operator_info);
-    if ($operator_info['user_id']) {
-        echo "Tamam";
-    }
+    print_r(checkAuth());
 }

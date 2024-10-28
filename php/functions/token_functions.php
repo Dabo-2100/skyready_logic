@@ -12,7 +12,6 @@ function createToken($user_id, $is_super)
         "iss" => gethostbyaddr($_SERVER['REMOTE_ADDR']),
         "iss_ip" => $_SERVER['REMOTE_ADDR'],
         "iat" => time(), // issued at time
-        "exp" => time() + (7 * 60 * 60), // expiration time after one week
         "user_id" => $user_id,
         "is_super" => $is_super
     ];
@@ -27,6 +26,6 @@ function checkToken($token)
         $decoded = JWT::decode($token, new Key($key, 'HS256'));
         return json_encode($decoded);
     } catch (Exception $e) {
-        return false;
+        return $e;
     }
 }
