@@ -53,8 +53,8 @@ function zones_store()
             $sta_value = isset($POST_data["sta_value"]) ? htmlspecialchars($POST_data["sta_value"]) : '0';
             $wl_value = isset($POST_data["wl_value"]) ? htmlspecialchars($POST_data["wl_value"]) : '0';
             $bl_value = isset($POST_data["bl_value"]) ? htmlspecialchars($POST_data["bl_value"]) : '0';
-            $fields = ["model_id", "zone_name", "sta_value", "wl_value", "bl_value"];
-            $values = ["$model_id", "$zone_name", "$sta_value", "$wl_value", "$bl_value"];
+            $fields = ["model_id", "zone_name"];
+            $values = ["$model_id", "$zone_name"];
             if (is_null($parent_id) == false) {
                 array_push($fields, "parent_id");
                 array_push($values, $parent_id);
