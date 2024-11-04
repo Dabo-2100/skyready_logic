@@ -183,6 +183,12 @@ function project_wps_filter($id)
         if (isset($project_info[0])) {
             $sql = "SELECT wp.package_id as work_package_id, wp.*, 
                     parent_wp.package_name AS parent_name, 
+                    (
+                        SELECT SUM( wpt.task_duration * (pt5.task_progress / 100) ) FROM work_package_tasks wpt
+                        JOIN project_tasks pt5 ON pt5.task_id = wpt.task_id
+                        WHERE pt5.project_id = {$project_id} AND wpt.package_id = wp.package_id AND {$condition}
+                    ) AS total_done_time
+                    ,
                     (SELECT 
                         SUM(task_duration) FROM work_package_tasks wpt 
                         WHERE task_id IN 
