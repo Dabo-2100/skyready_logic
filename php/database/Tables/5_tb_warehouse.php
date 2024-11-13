@@ -9,6 +9,19 @@ $statements = array_merge($statements, [
         UNIQUE (warehouse_name)
     )',
 
+    'CREATE TABLE IF NOT EXISTS warehouses_users( 
+        log_id                  INT(20) AUTO_INCREMENT PRIMARY KEY,
+        warehouse_id            INT,      
+        FOREIGN KEY (warehouse_id) REFERENCES app_warehouses(warehouse_id),
+        user_id                 INT, 
+        FOREIGN KEY (user_id) REFERENCES app_users(user_id),
+        is_admin                BOOLEAN DEFAULT FALSE,
+        is_active               BOOLEAN DEFAULT TRUE,
+        created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_update             TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE (warehouse_id,user_id)
+    )',
+
     'CREATE TABLE IF NOT EXISTS warehouse_locations( 
         location_id             INT(20) AUTO_INCREMENT PRIMARY KEY,
         location_name           VARCHAR(255) NOT NULL,
