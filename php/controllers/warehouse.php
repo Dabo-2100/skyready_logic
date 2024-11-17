@@ -95,6 +95,3 @@ function warehouses_store()
         echo 'Method Not Allowed';
     }
 }
-
-
-
