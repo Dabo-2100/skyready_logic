@@ -155,6 +155,18 @@ $statements = array_merge($statements, [
         last_update           TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )',
 
+
+    'CREATE TABLE IF NOT EXISTS warehose_locations ( 
+        location_id             INT(20) AUTO_INCREMENT PRIMARY KEY,
+        location_name           VARCHAR(255) NOT NULL,
+        warehouse_id            INT,
+        FOREIGN KEY (warehouse_id) REFERENCES app_warehouses(warehouse_id),
+        is_active             BOOLEAN DEFAULT TRUE,
+        created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_update           TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE (location_name)
+    )',
+
     'CREATE TABLE IF NOT EXISTS record_types ( 
         type_id               INT(20) AUTO_INCREMENT PRIMARY KEY,
         type_name             VARCHAR(255) NOT NULL,
@@ -166,8 +178,8 @@ $statements = array_merge($statements, [
 
     'CREATE TABLE IF NOT EXISTS items_qty_logs( 
         record_id                INT(20) AUTO_INCREMENT PRIMARY KEY,
-        record_type_id           INT,
-        FOREIGN KEY (record_type_id) REFERENCES warehouse_notices(notice_id),     
+        type_id                  INT,
+        FOREIGN KEY (type_id) REFERENCES record_types(type_id),     
         notice_id                INT,
         FOREIGN KEY (notice_id) REFERENCES warehouse_notices(notice_id),
         packlist_id              INT,
@@ -184,7 +196,7 @@ $statements = array_merge($statements, [
         is_active                BOOLEAN DEFAULT TRUE,
         created_at               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_update              TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE (record_type_id , notice_id,packlist_id,item_id,location_id,warehouse_id)
+        UNIQUE (type_id , notice_id , packlist_id,item_id,location_id,warehouse_id)
     )',
 
 ]);
