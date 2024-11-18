@@ -1,6 +1,6 @@
 <?php
 $statements = array_merge($statements, [
-    'INSERT IGNORE INTO app_roles (role_id,role_name) VALUES (1,"super"),(2,"admin"),(3,"user")',
+    'INSERT IGNORE INTO app_roles (role_id,role_name) VALUES (1,"admin"),(2,"user")',
 
     'INSERT IGNORE INTO app_apps 
         (app_id,app_name,app_icon,app_order) VALUES 

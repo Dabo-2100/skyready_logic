@@ -240,7 +240,7 @@ function project_tasks($id)
         $package_info = getRows("work_packages", "package_id=" . htmlspecialchars($package_id));
         if (isset($project_info[0]) && isset($package_info[0])) {
             $package_tasks = [];
-            $sql = "SELECT * FROM project_tasks
+            $sql = "SELECT * , (SELECT count(*) FROM task_comments WHERE log_id = project_tasks.log_id ) AS comments_no FROM project_tasks
                 INNER JOIN work_package_tasks
                 WHERE project_tasks.project_id = {$project_id} 
                 AND work_package_tasks.package_id = {$package_id}
@@ -256,7 +256,8 @@ function project_tasks($id)
                 $response['data'] = array_map(function ($el) {
                     $obj = [
                         'log_id'            => $el['log_id'],
-                        'task_id'            => $el['task_id'],
+                        'comments_no'       => $el['comments_no'],
+                        'task_id'           => $el['task_id'],
                         'status_id'         => $el['status_id'],
                         'status_name'       => getOneField("project_status", "status_name", "status_id = {$el['status_id']}"),
                         'task_order'        => $el['task_order'],
@@ -306,7 +307,8 @@ function project_tasks_filter($id)
                         wpt.task_order,
                         wpt.task_duration, 
                         specialty.specialty_name, 
-                        tt.type_name as task_type_name
+                        tt.type_name as task_type_name, 
+                        (SELECT count(*) FROM task_comments WHERE log_id = pt.log_id ) AS comments_no 
                         FROM project_tasks pt
                         JOIN work_package_tasks wpt ON pt.task_id = wpt.task_id
                         JOIN project_status ps ON pt.status_id = ps.status_id
