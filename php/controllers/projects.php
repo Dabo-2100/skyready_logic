@@ -4,6 +4,7 @@ $endpoints += [
     '/api/projects'                                     => 'projects_index',
     '/api/projects/\d+'                                 => 'projects_show',
     '/api/projects/store'                               => 'projects_store',
+    '/api/projects/remove/\d+'                          => 'projects_remove',
     '/api/project/dashboard/\d+'                        => 'project_dashboard',
     '/api/project/workpackages/\d+'                     => 'project_wps',
     '/api/project/\d+/workpackages/\d+/tasks'           => 'project_tasks',
@@ -343,7 +344,7 @@ function project_tasks_filter($id)
 function project_remove_workpackage($id)
 {
     global $method, $response, $POST_data, $pdo;
-    $project_id = explode("/workpackages", (explode("/api/project/", $id[0])[1]))[0];
+    $project_id = explode("/api/projects/remove", (explode("/api/project/", $id[0])[1]))[0];
     $package_id = explode("/remove", (explode("workpackages/", $id[0])[1]))[0];
     if ($method === "POST") {
         $operator_info = checkAuth();
@@ -398,6 +399,87 @@ function project_remove_workpackage($id)
             $final = [];
             $response['err'] = false;
             $response['msg'] = 'Work Package Deleted Successflly';
+            $response['data'] = $final;
+        } else {
+            $response['msg'] = 'Project id is wrong !';
+        }
+        echo json_encode($response, true);
+    } else {
+        echo 'Method Not Allowed';
+    }
+}
+
+function projects_remove($id)
+{
+    global $method, $response, $pdo;
+    $project_id = explode("/api/projects/remove/", $id[0])[1];
+    if ($method === "GET") {
+        $operator_info = checkAuth();
+        $project_info = getRows("app_projects", "project_id=" . htmlspecialchars($project_id));
+        if (isset($project_info[0])) {
+            $project_wps = getRows("project_work_packages", "project_id =" . htmlspecialchars($project_id));
+            if ($project_wps && count($project_wps[0]) != 0) {
+                foreach ($project_wps as $index => $wp) {
+                    $package_id = $wp['work_package_id'];
+                    $sql = "
+                    START TRANSACTION;
+                    
+                        -- Delete child comments first
+                        DELETE tc_child
+                        FROM task_comments tc_child
+                        JOIN project_tasks pt ON tc_child.log_id = pt.log_id
+                        WHERE pt.project_id = {$project_id} AND tc_child.parent_id IS NOT NULL;
+            
+                        -- Delete parent comments (those without a parent_id)
+                        DELETE tc_child
+                        FROM task_comments tc_child
+                        JOIN project_tasks pt ON tc_child.log_id = pt.log_id
+                        WHERE pt.project_id = {$project_id} AND tc_child.parent_id IS NULL;
+            
+                        DELETE pt
+                        FROM project_tasks pt
+                        JOIN work_package_tasks wpt ON pt.task_id = wpt.task_id
+                        WHERE wpt.package_id = {$package_id} AND pt.project_id ={$project_id};
+            
+                        DELETE wpt
+                        FROM work_package_progress_tracker wpt
+                        WHERE wpt.work_packages_log_id = (SELECT log_id FROM project_work_packages 
+                        WHERE work_package_id = {$package_id} AND project_id = {$project_id});
+                        
+                        
+                        DELETE wpst
+                        FROM work_package_status_tracker wpst
+                        WHERE wpst.work_package_log_id = (SELECT log_id FROM project_work_packages 
+                        WHERE work_package_id = {$package_id} AND project_id = {$project_id});
+            
+                        DELETE pwp
+                        FROM project_work_packages pwp
+                        WHERE pwp.work_package_id = {$package_id} AND pwp.project_id ={$project_id};
+
+                    COMMIT;
+                    ";
+                    $statement = $pdo->prepare($sql);
+                    $statement->execute();
+                }
+            }
+
+            $sql2 = "
+                START TRANSACTION;
+                    DELETE ppt
+                    FROM project_progress_tracker ppt
+                    WHERE ppt.project_id = {$project_id};
+
+                    DELETE ap 
+                    FROM app_projects ap
+                    WHERE project_id = {$project_id};
+                COMMIT;
+            ";
+            $statement = $pdo->prepare($sql2);
+            $statement->execute();
+
+            $final = [];
+            $response['err'] = false;
+            $response['msg'] = 'Project Deleted Successflly';
             $response['data'] = $final;
         } else {
             $response['msg'] = 'Project id is wrong !';

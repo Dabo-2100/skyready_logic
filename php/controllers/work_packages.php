@@ -109,7 +109,7 @@ function packages_show($id)
     global $method, $response;
     if ($method === "GET") {
         $operator_info = checkAuth();
-        $package_info = getRows("work_packages", "package_id=" . htmlspecialchars($package_id)." ORDER BY package_name");
+        $package_info = getRows("work_packages", "package_id=" . htmlspecialchars($package_id) . " ORDER BY package_name");
         if (isset($package_info[0])) {
             $package_info = $package_info[0];
             $response['err'] = false;

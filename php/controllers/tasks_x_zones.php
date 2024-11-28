@@ -5,6 +5,7 @@ $endpoints += [
     '/api/aircraft/task/zones/\d+'      => 'task_zones_show',
     '/api/aircraft/task/zones/store'    => 'task_zones_store',
     '/api/aircraft/task/zones/delete'   => 'task_zones_delete',
+    '/api/aircraft/task/vs/zones'       => 'tasks_vs_zones',
 ];
 
 function task_zones_index()
@@ -87,6 +88,42 @@ function task_zones_delete()
             http_response_code(401);
             exit();
         }
+    } else {
+        echo 'Method Not Allowed';
+    }
+}
+
+function tasks_vs_zones()
+{
+    global $method, $POST_data, $pdo, $response;
+    if ($method === "POST") {
+        $operator_info = checkAuth();
+        $zones_id = htmlspecialchars($POST_data["zones_id"]);
+        $sql = "WITH RECURSIVE zone_hierarchy AS 
+        (SELECT az.* FROM aircraft_zones az WHERE az.zone_id IN ({$zones_id})
+        UNION ALL SELECT az.* FROM aircraft_zones az INNER JOIN zone_hierarchy ch ON az.parent_id = ch.zone_id) 
+        -- SELECT DISTINCT zone_id FROM zone_hierarchy
+        SELECT * FROM tasks_x_zones txz
+        WHERE txz.zone_id IN (SELECT DISTINCT zone_id FROM zone_hierarchy)
+        ";
+        $statement = $pdo->prepare($sql);
+        $statement->execute();
+        $final = [];
+        if ($statement->rowCount() > 0) {
+            while ($el = $statement->fetch(PDO::FETCH_ASSOC)) {
+                $returnObj = ['task_id' => $el['task_id']];
+                $returnObj['task_name'] = getOneField("work_package_tasks", "task_name", "task_id = {$el['task_id']}");
+                $returnObj['task_duration'] = getOneField("work_package_tasks", "task_duration", "task_id = {$el['task_id']}");
+                $returnObj['specialty_id'] = getOneField("work_package_tasks", "specialty_id", "task_id = {$el['task_id']}");
+                $returnObj['specialty_name'] = getOneField("app_specialties", "specialty_name", "specialty_id = {$returnObj['specialty_id']}");
+                $returnObj['package_id'] = getOneField("work_package_tasks", "package_id", "task_id = {$el['task_id']}");
+                $returnObj['package_name'] = getOneField("work_packages", "package_name", "package_id = {$returnObj['package_id']}");
+                $returnObj['parent_name'] = getOneField("work_packages", "package_name", "package_id = {$returnObj['package_id']}");
+                array_push($final, $returnObj);
+            }
+        }
+        $response['data'] = $final;
+        echo json_encode($response, true);
     } else {
         echo 'Method Not Allowed';
     }

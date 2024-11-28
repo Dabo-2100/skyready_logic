@@ -45,10 +45,21 @@ $statements = array_merge($statements, [
         UNIQUE (unit_name)
     )',
 
+    'CREATE TABLE IF NOT EXISTS item_categories( 
+        category_id                  INT(20) AUTO_INCREMENT PRIMARY KEY,
+        category_name                VARCHAR(255) NOT NULL,
+        created_at                   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_update                  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        is_active                    BOOLEAN DEFAULT TRUE,
+        UNIQUE (category_name)
+    )',
+
     'CREATE TABLE IF NOT EXISTS warehouse_items( 
         item_id                 INT(20) AUTO_INCREMENT PRIMARY KEY,
         unit_id                 INT,
         FOREIGN KEY (unit_id) REFERENCES warehouse_units(unit_id),
+        category_id             INT,
+        FOREIGN KEY (category_id) REFERENCES item_categories(category_id),
         item_name               VARCHAR(255) NOT NULL,
         item_img                VARCHAR(255) NOT NULL,
         item_sn                 VARCHAR(255) NOT NULL,
@@ -155,8 +166,7 @@ $statements = array_merge($statements, [
         last_update           TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )',
 
-
-    'CREATE TABLE IF NOT EXISTS warehose_locations ( 
+    'CREATE TABLE IF NOT EXISTS warehouse_locations ( 
         location_id             INT(20) AUTO_INCREMENT PRIMARY KEY,
         location_name           VARCHAR(255) NOT NULL,
         warehouse_id            INT,
@@ -187,7 +197,7 @@ $statements = array_merge($statements, [
         item_id                  INT,
         FOREIGN KEY (item_id) REFERENCES warehouse_items(item_id),
         location_id              INT,
-        FOREIGN KEY (location_id) REFERENCES warehose_locations(location_id),
+        FOREIGN KEY (location_id) REFERENCES warehouse_locations(location_id),
         warehouse_id             INT,
         FOREIGN KEY (warehouse_id) REFERENCES app_warehouses(warehouse_id),
         before_balance           FLOAT(20) ,
